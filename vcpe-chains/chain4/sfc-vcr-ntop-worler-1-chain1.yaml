@@ -1,0 +1,20 @@
+---
+apiVersion: contivpp.io/v1
+kind: ServiceFunctionChain
+metadata:
+  name: linux-8-chain4
+spec:
+  chain:
+    - name: CNF 2
+      type: Pod
+      podSelector:
+        cnf: vcr-node1-4
+      interface: eth2
+
+    - name: CNF 3
+      type: Pod
+      podSelector:
+        cnf: ntop1-node1-4
+      interface: eth2
+  nodeSelector:
+    disktype: chain1

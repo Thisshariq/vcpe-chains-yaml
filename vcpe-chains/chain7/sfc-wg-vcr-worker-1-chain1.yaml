@@ -1,0 +1,20 @@
+---
+apiVersion: contivpp.io/v1
+kind: ServiceFunctionChain
+metadata:
+  name: linux-13-chain7
+spec:
+  chain:
+    - name: CNF 1
+      type: Pod
+      podSelector:
+        cnf: wireguard-node1-7
+      interface: eth2
+
+    - name: CNF 2
+      type: Pod
+      podSelector:
+        cnf: vcr-node1-7
+      interface: eth1
+  nodeSelector:
+    disktype: chain1

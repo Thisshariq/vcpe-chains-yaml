@@ -1,0 +1,47 @@
+---
+# Linux CNF 2 pod definition. Pod is connected with one additional tap interface
+# in the "stub" network = meaning that it won't have any IP address assigned.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ntop1-node1-4
+  annotations:
+    contivpp.io/custom-if: eth1/tap/stub ,eth2/tap/stub
+  labels:
+    cnf: ntop1-node1-4
+spec:
+  containers:
+    - name: ntop1-node1-4
+      image: 836891784212.dkr.ecr.us-east-1.amazonaws.com/custompodimages:ntopv1.1
+      imagePullPolicy: IfNotPresent
+      securityContext:
+        privileged: true
+      ports:
+      - containerPort: 3004
+        protocol: TCP
+      command:
+      - /bin/bash
+      - /run.sh
+  nodeSelector:
+    disktype: chain1
+  imagePullSecrets:
+    - name: regcred
+  dnsConfig:
+    nameservers:
+      - 8.8.8.8
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: ntop1-node1-4
+  name: ntop-service-node1-4
+spec:
+  type: NodePort
+  ports:
+  - port: 3004
+    nodePort: 31834
+    protocol: TCP
+    targetPort: 3004
+  selector:
+    cnf: ntop1-node1-4

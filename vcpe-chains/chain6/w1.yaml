@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wireguard-configmap-node1-6
+data:
+  PUID: "1000"
+  PGID: "1000"
+  TZ: "Asia/Kolkata"
+  SERVERPORT: "31300"
+  PEERS: "2"
+  ALLOWEDIPS: "0.0.0.0/0, ::/0"
+  INTERNAL_SUBNET: "20.1.2.0"
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: wireguard-node1-6
+  annotations:
+    contivpp.io/custom-if: eth1/tap/stub, eth2/tap/stub
+  labels:
+    cnf: wireguard-node1-6
+    app: wireguard-node1-6
+spec:
+  containers:
+  - name: wireguard-node1-chain6
+    #    image: linuxserver/wireguard
+    image: 836891784212.dkr.ecr.us-east-1.amazonaws.com/wireguard:latest
+    envFrom:
+    - configMapRef:
+        name: wireguard-configmap-node1-6
+    securityContext:
+      capabilities:
+        add:
+          - NET_ADMIN
+          - SYS_MODULE
+      privileged: true
+    ports:
+    - containerPort: 51832
+      protocol: UDP
+      #    resources:
+      #  requests:
+      #   memory: "64Mi"
+      #  cpu: "100m"
+      # limits:
+      # memory: "128Mi"
+      # cpu: "200m"
+  nodeSelector:
+    disktype: chain1
+  imagePullSecrets:
+    - name: regcred
+  dnsConfig:
+    nameservers:
+      - 8.8.8.8
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: wireguard-node1-6
+  name: wireguard-service-node1-6
+spec:
+  type: NodePort
+  ports:
+  - port: 51832
+    nodePort: 31300
+    protocol: UDP
+    targetPort: 51832
+  selector:
+          app: wireguard-node1-6

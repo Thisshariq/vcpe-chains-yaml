@@ -1,0 +1,28 @@
+---
+# Linux CNF 1 pod definition. Pod is connected with one additional tap interface
+# in the "stub" network = meaning that it won't have any IP address assigned.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: vcr-node1-5
+  annotations:
+    contivpp.io/custom-if: eth1/tap/stub, eth2/tap/stub
+  labels:
+    cnf: vcr-node1-5
+spec:
+  containers:
+    - name: vcr-node1-5
+      image: 836891784212.dkr.ecr.us-east-1.amazonaws.com/custompodimages:vcrv3.0
+      imagePullPolicy: IfNotPresent
+      securityContext:
+        privileged: true
+      command:
+        - /bin/bash
+        - /run.sh
+  nodeSelector:
+    disktype: chain1
+  imagePullSecrets:
+    - name: regcred
+  dnsConfig:
+    nameservers:
+      - 8.8.8.8
